@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ideology Machine</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #080c18;
+    color: #d8e4f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 1.6rem 1rem 0.8rem;
+  }
+
+  .header h1 {
+    font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #eef2ff;
+    text-transform: uppercase;
+    text-shadow: 0 0 40px rgba(120,140,255,0.3);
+  }
+
+  .header .subtitle {
+    font-size: clamp(0.7rem, 1.6vw, 0.9rem);
+    color: #667799;
+    margin-top: 0.35rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .scenario-label {
+    color: #556688;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+
+  .scenario-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+
+  .scenario-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8899bb;
+    padding: 0.35rem 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .scenario-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.22);
+    color: #aabbd0;
+  }
+
+  .scenario-btn.active {
+    background: rgba(100,140,255,0.12);
+    border-color: rgba(100,140,255,0.4);
+    color: #99b8ff;
+  }
+
+  .run-btn {
+    background: linear-gradient(135deg, rgba(140,25,30,0.45), rgba(0,140,140,0.45));
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #eef2ff;
+    padding: 0.45rem 1.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .run-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(160,35,40,0.65), rgba(0,160,160,0.65));
+    border-color: rgba(255,255,255,0.35);
+  }
+
+  .run-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 0.8rem;
+    position: relative;
+  }
+
+  canvas {
+    width: 100%;
+    display: block;
+    border: 1px solid rgba(80,100,160,0.15);
+    border-radius: 6px;
+  }
+
+  /* Network name badges flanking the canvas */
+  .net-labels {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0.3rem auto 0;
+    padding: 0 0.8rem;
+  }
+
+  .net-label {
+    font-size: clamp(0.65rem, 1.4vw, 0.8rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .net-label.left  { color: #c03040; }
+  .net-label.right { color: #00c8c8; }
+
+  .output-panels {
+    display: flex;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0.6rem auto;
+    padding: 0 0.8rem;
+  }
+
+  .output-panel {
+    flex: 1;
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    min-height: 68px;
+  }
+
+  .output-panel.left  { background: rgba(160,30,35,0.09); border: 1px solid rgba(160,30,35,0.28); }
+  .output-panel.right { background: rgba(0,170,170,0.09); border: 1px solid rgba(0,170,170,0.28); }
+
+  .panel-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .output-panel.left  .panel-label { color: #c04050; }
+  .output-panel.right .panel-label { color: #00c8c8; }
+
+  .panel-text {
+    font-size: 0.78rem;
+    color: #7a90b0;
+    line-height: 1.55;
+    font-style: italic;
+    opacity: 0.45;
+    transition: opacity 0.7s ease;
+  }
+
+  .panel-text.lit { opacity: 1; color: #99b0cc; }
+
+  .footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 1200px;
+    margin: 0.4rem auto 0;
+    padding: 0 0.8rem;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.2rem;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    color: #556688;
+  }
+
+  .l-swatch {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .l-line {
+    width: 22px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  .about-section {
+    max-width: 860px;
+    margin: 0.7rem auto 1.4rem;
+    padding: 0 0.8rem;
+  }
+
+  .about-toggle {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #556688;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.73rem;
+    width: 100%;
+    text-align: left;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .about-toggle:hover { background: rgba(255,255,255,0.03); color: #7788aa; }
+
+  .about-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .about-body.open { max-height: 220px; }
+
+  .about-body p {
+    font-size: 0.79rem;
+    color: #6678a0;
+    line-height: 1.72;
+    padding: 0.85rem 0.9rem;
+    border-left: 2px solid rgba(80,110,180,0.25);
+    margin-top: 0.5rem;
+  }
+
+  .about-body em   { color: #8899bb; font-style: italic; }
+  .about-body strong { color: #99aacc; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>The Ideology Machine</h1>
+  <div class="subtitle">Two neural nets, two traditions — how the same social problem gets routed differently &nbsp;·&nbsp; after Fred Turner (2005)</div>
+</div>
+
+<div class="controls">
+  <span class="scenario-label">Scenario:</span>
+  <div class="scenario-buttons">
+    <button class="scenario-btn active" data-s="0">A factory is polluting the river</button>
+    <button class="scenario-btn" data-s="1">Workers are being exploited</button>
+    <button class="scenario-btn" data-s="2">Young people are leaving for communes</button>
+  </div>
+  <button class="run-btn" id="runBtn">▶ Run Scenario</button>
+</div>
+
+<div class="canvas-wrap">
+  <canvas id="c"></canvas>
+</div>
+
+<div class="net-labels">
+  <span class="net-label left">The New Left</span>
+  <span class="net-label right">The New Communalists</span>
+</div>
+
+<div class="output-panels">
+  <div class="output-panel left">
+    <div class="panel-label">New Left — Output</div>
+    <div class="panel-text" id="leftOut">Select a scenario and click Run to see the network's decision.</div>
+  </div>
+  <div class="output-panel right">
+    <div class="panel-label">New Communalists — Output</div>
+    <div class="panel-text" id="rightOut">Select a scenario and click Run to see the network's decision.</div>
+  </div>
+</div>
+
+<div class="footer-row">
+  <div class="legend">
+    <div class="legend-item">
+      <div class="l-swatch" style="background:#c03040;"></div>
+      <span>New Left (crimson)</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-swatch" style="background:#00c8c8;"></div>
+      <span>New Communalists (teal)</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-line" style="height:4px;background:rgba(255,255,255,0.45);"></div>
+      <span>Strong weight</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-line" style="height:1px;background:rgba(255,255,255,0.15);"></div>
+      <span>Weak weight</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-swatch" style="background:#ffffff;box-shadow:0 0 6px #fff,0 0 12px rgba(200,220,255,0.7);width:8px;height:8px;"></div>
+      <span>Signal pulse</span>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <button class="about-toggle" id="aboutToggle">▸&nbsp; About This Simulation</button>
+  <div class="about-body" id="aboutBody">
+    <p>
+      In his 2005 article <em>"Where the Counterculture Met the New Economy,"</em> historian <strong>Fred Turner</strong> identifies two distinct political traditions that emerged from 1960s America. The <strong>New Left</strong> believed social change required collective political struggle — organizing, protest, coalition-building, and structural reform of existing institutions. The <strong>New Communalists</strong> (associated with Stewart Brand and the <em>Whole Earth Catalog</em>) believed the real obstacle was consciousness itself: by giving individuals better tools and information, society could be transformed from the inside out, without direct political confrontation. Turner's insight is that these two traditions had entirely different <em>weight matrices</em> — the same social problem, fed through each ideology, would be routed along different value pathways and emerge as radically different prescriptions for action. This simulation renders that difference as a literal neural network: two architectures, same inputs, visibly different weights, divergent outputs.
+    </p>
+  </div>
+</div>
+
+<script>
+// =============================================================
+//  THE IDEOLOGY MACHINE
+//  Neural network visualization of Fred Turner's thesis (2005)
+// =============================================================
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+// ------------------------------------------------------------------
+// SCENARIOS
+// ------------------------------------------------------------------
+const SCENARIOS = [
+  {
+    label:    "A factory is polluting the river",
+    inputs:   [0.92, 0.74, 0.88],   // Social Problem, Community Impact, Power Imbalance
+    leftOut:  "Organize a coalition of affected residents, pressure the legislature, and demand that regulators enforce environmental law. Power structures that allow this damage must be confronted and reformed directly.",
+    rightOut: "Share data about the contamination openly, build low-cost water-monitoring tools, and educate the community. Raise individual and collective consciousness about the system — better information changes behavior from within."
+  },
+  {
+    label:    "Workers are being exploited",
+    inputs:   [0.80, 0.88, 0.96],
+    leftOut:  "Unionize the workforce immediately. Use collective bargaining, solidarity networks, and targeted legislation to force structural change in the power relationship between labor and capital.",
+    rightOut: "Educate workers about cooperative ownership models and alternative economic structures. Share tools for self-organization and build platforms that make exploitative intermediaries obsolete."
+  },
+  {
+    label:    "Young people are leaving for communes",
+    inputs:   [0.55, 0.95, 0.38],
+    leftOut:  "This exodus signals a failure of political institutions to address alienation. The energy should be redirected back into structural reform — withdrawing from society only cedes ground to those already in power.",
+    rightOut: "This is the transformation in action. Small-scale intentional communities, built with the right tools and values, are living experiments in new consciousness — they are the change, not a retreat from it."
+  }
+];
+
+// ------------------------------------------------------------------
+// NETWORK DEFINITIONS
+// Node layers + weight matrices [fromNode][toNode]
+// ------------------------------------------------------------------
+
+const NET_LEFT = {
+  name:       "The New Left",
+  color:      '#c03040',
+  glow:       'rgba(192,48,64,',
+  pulse:      '#ff9090',
+  layers: [
+    // L0 — Input
+    ["Social\nProblem", "Community\nImpact", "Power\nImbalance"],
+    // L1 — Values
+    ["Collective\nAction", "Political\nPower", "Structural\nReform", "Solidarity", "Confrontation"],
+    // L2 — Strategy
+    ["Organize", "Protest", "Legislate", "Unionize"],
+    // L3 — Output
+    ["Political\nTransformation", "Structural\nChange"]
+  ],
+  w01: [                          // [3][5]  L0→L1
+    [0.94, 0.72, 0.62, 0.78, 0.42],  // Social Problem →
+    [0.76, 0.48, 0.58, 0.95, 0.33],  // Community Impact →
+    [0.50, 0.84, 0.90, 0.38, 0.92],  // Power Imbalance →
+  ],
+  w12: [                          // [5][4]  L1→L2
+    [0.96, 0.68, 0.52, 0.82],   // Collective Action →
+    [0.58, 0.44, 0.92, 0.48],   // Political Power →
+    [0.52, 0.58, 0.88, 0.66],   // Structural Reform →
+    [0.90, 0.78, 0.38, 0.92],   // Solidarity →
+    [0.62, 0.96, 0.32, 0.52],   // Confrontation →
+  ],
+  w23: [                          // [4][2]  L2→L3
+    [0.92, 0.68],   // Organize →
+    [0.78, 0.54],   // Protest →
+    [0.58, 0.94],   // Legislate →
+    [0.52, 0.82],   // Unionize →
+  ]
+};
+
+const NET_RIGHT = {
+  name:       "The New Communalists",
+  color:      '#00c8c8',
+  glow:       'rgba(0,200,200,',
+  pulse:      '#88ffff',
+  layers: [
+    // L0 — Input (same labels)
+    ["Social\nProblem", "Community\nImpact", "Power\nImbalance"],
+    // L1 — Values
+    ["Individual\nAutonomy", "Tool\nAccess", "Information\nFlow", "Consciousness\nChange", "Systems\nThinking"],
+    // L2 — Strategy
+    ["Build", "Share", "Educate", "Innovate"],
+    // L3 — Output
+    ["Cultural\nTransformation", "Technological\nSolution"]
+  ],
+  w01: [                          // [3][5]
+    [0.50, 0.72, 0.94, 0.58, 0.84],  // Social Problem →
+    [0.90, 0.52, 0.62, 0.92, 0.68],  // Community Impact →
+    [0.62, 0.92, 0.68, 0.52, 0.86],  // Power Imbalance →
+  ],
+  w12: [                          // [5][4]
+    [0.58, 0.72, 0.82, 0.52],   // Individual Autonomy →
+    [0.92, 0.54, 0.62, 0.94],   // Tool Access →
+    [0.68, 0.96, 0.74, 0.82],   // Information Flow →
+    [0.52, 0.62, 0.94, 0.58],   // Consciousness Change →
+    [0.74, 0.70, 0.64, 0.90],   // Systems Thinking →
+  ],
+  w23: [                          // [4][2]
+    [0.68, 0.94],   // Build →
+    [0.90, 0.76],   // Share →
+    [0.82, 0.58],   // Educate →
+    [0.52, 0.96],   // Innovate →
+  ]
+};
+
+// ------------------------------------------------------------------
+// LAYOUT
+// ------------------------------------------------------------------
+let W, H, NR; // canvas dims, node radius
+let posLeft, posRight; // [[{x,y},...], ...]  per layer
+
+const LAYER_LABELS = ['Input', 'Values', 'Strategy', 'Output'];
+
+function computeLayout() {
+  const pad   = Math.max(28, W * 0.025);
+  const mid   = W / 2;
+  const gap   = Math.max(18, W * 0.032);
+  const mTop  = Math.max(44, H * 0.1);
+  const mBot  = Math.max(52, H * 0.12);
+
+  NR = Math.max(9, Math.min(15, W / 85));
+
+  posLeft  = layoutNet(NET_LEFT,  pad,       mid - gap);
+  posRight = layoutNet(NET_RIGHT, mid + gap, W - pad);
+}
+
+function layoutNet(net, x0, x1) {
+  const nL = net.layers.length;
+  return net.layers.map((layer, li) => {
+    const x    = x0 + (x1 - x0) * (li / (nL - 1));
+    const mTop = Math.max(44, H * 0.1);
+    const mBot = Math.max(52, H * 0.12);
+    const span = H - mTop - mBot;
+    const n    = layer.length;
+    return layer.map((_, ni) => ({
+      x,
+      y: mTop + span * (ni + 1) / (n + 1)
+    }));
+  });
+}
+
+// ------------------------------------------------------------------
+// WEIGHT HELPER
+// ------------------------------------------------------------------
+function getW(net, layer, f, t) {
+  if (layer === 0) return net.w01[f][t];
+  if (layer === 1) return net.w12[f][t];
+  if (layer === 2) return net.w23[f][t];
+  return 0;
+}
+
+// ------------------------------------------------------------------
+// FORWARD PASS
+// ------------------------------------------------------------------
+function forwardPass(net, inputs) {
+  const act = [inputs.slice()];
+
+  for (let l = 0; l < 3; l++) {
+    const prev  = act[l];
+    const nNext = net.layers[l + 1].length;
+    const next  = [];
+    for (let t = 0; t < nNext; t++) {
+      let s = 0;
+      for (let f = 0; f < prev.length; f++) s += prev[f] * getW(net, l, f, t);
+      next.push(Math.min(1, s / prev.length * (l === 0 ? 1.4 : l === 1 ? 1.6 : 2.0)));
+    }
+    act.push(next);
+  }
+  return act;
+}
+
+// ------------------------------------------------------------------
+// DRAW BACKGROUND
+// ------------------------------------------------------------------
+function drawBG() {
+  ctx.fillStyle = '#080c18';
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle graph-paper grid
+  const gs = 28;
+  ctx.strokeStyle = 'rgba(80,110,200,0.035)';
+  ctx.lineWidth   = 0.5;
+  for (let x = 0; x <= W; x += gs) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Centre divider
+  ctx.beginPath();
+  ctx.moveTo(W/2, 6); ctx.lineTo(W/2, H-6);
+  ctx.strokeStyle = 'rgba(80,110,200,0.12)';
+  ctx.lineWidth   = 1;
+  ctx.setLineDash([5, 7]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ------------------------------------------------------------------
+// DRAW EDGES
+// ------------------------------------------------------------------
+function drawEdges(net, pos, act) {
+  for (let l = 0; l < pos.length - 1; l++) {
+    const fromAct = act ? act[l]   : null;
+    const toAct   = act ? act[l+1] : null;
+
+    for (let f = 0; f < pos[l].length; f++) {
+      for (let t = 0; t < pos[l+1].length; t++) {
+        const w   = getW(net, l, f, t);
+        const p0  = pos[l][f];
+        const p1  = pos[l+1][t];
+
+        // Activation boost: brighten if both endpoints are activated
+        const aBoost = act
+          ? (fromAct[f] || 0) * 0.5 + (toAct[t] || 0) * 0.5
+          : 0;
+
+        const alpha = 0.06 + w * 0.28 + aBoost * 0.35;
+        const lw    = 0.4  + w * 2.6  + aBoost * 1.2;
+
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.strokeStyle    = net.color;
+        ctx.lineWidth      = lw;
+        ctx.globalAlpha    = Math.min(1, alpha);
+        if (aBoost > 0.3) {
+          ctx.shadowColor  = net.color;
+          ctx.shadowBlur   = 4;
+        }
+        ctx.stroke();
+        ctx.shadowBlur  = 0;
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+}
+
+// ------------------------------------------------------------------
+// DRAW NODES
+// ------------------------------------------------------------------
+function drawNodes(net, pos, act) {
+  const fontSize = Math.max(7, Math.min(10, W / 120));
+  ctx.font        = `${fontSize}px -apple-system, system-ui, sans-serif`;
+  ctx.textAlign   = 'center';
+
+  for (let l = 0; l < pos.length; l++) {
+    for (let n = 0; n < pos[l].length; n++) {
+      const {x, y}   = pos[l][n];
+      const a        = act ? (act[l][n] || 0) : 0;
+      const label    = net.layers[l][n];
+
+      // Glow halo
+      if (a > 0.04) {
+        const gr = NR + a * 14;
+        const grd = ctx.createRadialGradient(x, y, NR * 0.4, x, y, gr);
+        grd.addColorStop(0, net.glow + (a * 0.65) + ')');
+        grd.addColorStop(1, 'transparent');
+        ctx.beginPath();
+        ctx.arc(x, y, gr, 0, Math.PI * 2);
+        ctx.fillStyle   = grd;
+        ctx.globalAlpha = 1;
+        ctx.fill();
+      }
+
+      // Node fill
+      ctx.beginPath();
+      ctx.arc(x, y, NR, 0, Math.PI * 2);
+      ctx.fillStyle   = net.color;
+      ctx.globalAlpha = 0.12 + a * 0.55;
+      ctx.fill();
+
+      // Node border
+      ctx.strokeStyle = net.color;
+      ctx.lineWidth   = 1.2 + a * 1.8;
+      ctx.globalAlpha = 0.38 + a * 0.62;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Label text (below node)
+      const lines  = label.split('\n');
+      const lh     = fontSize + 2;
+      const yBase  = y + NR + 7;
+      ctx.fillStyle   = a > 0.35 ? '#dde8f8' : '#607090';
+      ctx.globalAlpha = 0.6 + a * 0.4;
+      lines.forEach((ln, i) => ctx.fillText(ln, x, yBase + i * lh));
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+// ------------------------------------------------------------------
+// DRAW LAYER LABELS
+// ------------------------------------------------------------------
+function drawLayerLabels(pos) {
+  const fs = Math.max(7, Math.min(9, W / 140));
+  ctx.font        = `bold ${fs}px -apple-system, system-ui, sans-serif`;
+  ctx.textAlign   = 'center';
+  ctx.fillStyle   = 'rgba(70,95,145,0.55)';
+  ctx.globalAlpha = 1;
+
+  [posLeft, posRight].forEach(netPos => {
+    netPos.forEach((layer, li) => {
+      const cx = layer.reduce((s, p) => s + p.x, 0) / layer.length;
+      ctx.fillText(LAYER_LABELS[li].toUpperCase(), cx, 22);
+    });
+  });
+}
+
+// ------------------------------------------------------------------
+// DRAW PULSES
+// ------------------------------------------------------------------
+function drawPulses(net, pos, pulses) {
+  pulses.forEach(p => {
+    const from = pos[p.layer][p.from];
+    const to   = pos[p.layer + 1][p.to];
+    const t    = p.progress;
+    const x    = from.x + (to.x - from.x) * t;
+    const y    = from.y + (to.y - from.y) * t;
+
+    // Soft glow
+    const r   = 9;
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grd.addColorStop(0, net.pulse);
+    grd.addColorStop(0.4, net.glow + '0.5)');
+    grd.addColorStop(1,   'transparent');
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle   = grd;
+    ctx.globalAlpha = 0.9;
+    ctx.fill();
+
+    // Bright core
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle    = '#ffffff';
+    ctx.globalAlpha  = 1;
+    ctx.shadowColor  = net.pulse;
+    ctx.shadowBlur   = 8;
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+    ctx.globalAlpha = 1;
+  });
+}
+
+// ------------------------------------------------------------------
+// FULL RENDER
+// ------------------------------------------------------------------
+function render(actL, actR, pulsesL, pulsesR) {
+  drawBG();
+  drawEdges(NET_LEFT,  posLeft,  actL || null);
+  drawEdges(NET_RIGHT, posRight, actR || null);
+  drawNodes(NET_LEFT,  posLeft,  actL || null);
+  drawNodes(NET_RIGHT, posRight, actR || null);
+  if (pulsesL && pulsesL.length) drawPulses(NET_LEFT,  posLeft,  pulsesL);
+  if (pulsesR && pulsesR.length) drawPulses(NET_RIGHT, posRight, pulsesR);
+  drawLayerLabels();
+}
+
+// ------------------------------------------------------------------
+// ANIMATION
+// ------------------------------------------------------------------
+let animating = false;
+let rafId     = null;
+
+function runScenario() {
+  if (animating) return;
+  animating = true;
+  document.getElementById('runBtn').disabled = true;
+
+  const sc      = SCENARIOS[currentScenario];
+  const actL    = forwardPass(NET_LEFT,  sc.inputs);
+  const actR    = forwardPass(NET_RIGHT, sc.inputs);
+
+  // Display activations lerp from 0 to final
+  const dispL   = actL.map(layer => layer.map(() => 0));
+  const dispR   = actR.map(layer => layer.map(() => 0));
+
+  const LAYER_MS  = 820;  // ms per layer transition
+  const PULSE_SPD = 0.0014; // progress/ms — ~714ms to cross an edge
+  const STAGGER   = 70;   // ms between from-nodes in same layer
+
+  const t0 = performance.now();
+
+  // Pre-schedule all pulses (only for connections with w > 0.48)
+  const allPL = [], allPR = [];
+
+  for (let l = 0; l < 3; l++) {
+    const baseDelay = l * LAYER_MS;
+    for (let f = 0; f < NET_LEFT.layers[l].length; f++) {
+      const delay = baseDelay + f * STAGGER;
+      for (let t = 0; t < NET_LEFT.layers[l+1].length; t++) {
+        if (getW(NET_LEFT,  l, f, t) >= 0.48)
+          allPL.push({ layer: l, from: f, to: t, progress: 0, start: t0 + delay });
+        if (getW(NET_RIGHT, l, f, t) >= 0.48)
+          allPR.push({ layer: l, from: f, to: t, progress: 0, start: t0 + delay });
+      }
+    }
+  }
+
+  const totalDuration = 3 * LAYER_MS + 700;
+
+  function frame(now) {
+    const elapsed     = now - t0;
+    const layerPhase  = elapsed / LAYER_MS; // fractional layer index
+
+    // Lerp node activations per layer
+    for (let l = 0; l < 4; l++) {
+      const lp = Math.max(0, Math.min(1, layerPhase - l));
+      for (let n = 0; n < actL[l].length; n++) dispL[l][n] = actL[l][n] * lp;
+      for (let n = 0; n < actR[l].length; n++) dispR[l][n] = actR[l][n] * lp;
+    }
+
+    // Advance pulses
+    const visL = allPL.filter(p => {
+      if (now < p.start) return false;
+      p.progress = Math.min(1, (now - p.start) * PULSE_SPD);
+      return p.progress < 1;
+    });
+    const visR = allPR.filter(p => {
+      if (now < p.start) return false;
+      p.progress = Math.min(1, (now - p.start) * PULSE_SPD);
+      return p.progress < 1;
+    });
+
+    render(dispL, dispR, visL, visR);
+
+    if (elapsed < totalDuration) {
+      rafId = requestAnimationFrame(frame);
+    } else {
+      // Final frame — full activations
+      render(actL, actR, [], []);
+      showOutputs(sc);
+      animating = false;
+      document.getElementById('runBtn').disabled = false;
+    }
+  }
+
+  rafId = requestAnimationFrame(frame);
+}
+
+function showOutputs(sc) {
+  const lEl = document.getElementById('leftOut');
+  const rEl = document.getElementById('rightOut');
+  lEl.textContent = sc.leftOut;
+  rEl.textContent = sc.rightOut;
+  lEl.classList.add('lit');
+  rEl.classList.add('lit');
+}
+
+function resetOutputs() {
+  const lEl = document.getElementById('leftOut');
+  const rEl = document.getElementById('rightOut');
+  lEl.textContent = 'Select a scenario and click Run to see the network\'s decision.';
+  rEl.textContent = 'Select a scenario and click Run to see the network\'s decision.';
+  lEl.classList.remove('lit');
+  rEl.classList.remove('lit');
+}
+
+// ------------------------------------------------------------------
+// RESIZE
+// ------------------------------------------------------------------
+function resize() {
+  if (rafId) cancelAnimationFrame(rafId);
+  animating = false;
+  document.getElementById('runBtn').disabled = false;
+
+  const ctr = canvas.parentElement;
+  W = ctr.clientWidth;
+  H = Math.round(Math.max(380, Math.min(580, W * 0.52)));
+  canvas.width  = W;
+  canvas.height = H;
+
+  computeLayout();
+  render(null, null, [], []);
+}
+
+// ------------------------------------------------------------------
+// UI WIRING
+// ------------------------------------------------------------------
+let currentScenario = 0;
+
+document.querySelectorAll('.scenario-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (animating) return;
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentScenario = +btn.dataset.s;
+    resetOutputs();
+    render(null, null, [], []);
+  });
+});
+
+document.getElementById('runBtn').addEventListener('click', runScenario);
+
+document.getElementById('aboutToggle').addEventListener('click', () => {
+  const body = document.getElementById('aboutBody');
+  const btn  = document.getElementById('aboutToggle');
+  const open = body.classList.toggle('open');
+  btn.innerHTML = (open ? '▾' : '▸') + '&nbsp; About This Simulation';
+});
+
+window.addEventListener('resize', resize);
+
+// ------------------------------------------------------------------
+// INIT
+// ------------------------------------------------------------------
+resize();
+</script>
+</body>
+</html>
