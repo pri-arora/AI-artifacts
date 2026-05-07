@@ -3,965 +3,847 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NLS/AUGMENT :: AI FUTURES :: TEGMARK TYPOLOGY</title>
+<title>The Ideology Machine</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0d0d0d;
-    --paper: #f5f0e8;
-    --ink: #1a1a0f;
-    --amber: #ffb000;
-    --amber-dim: #7a5500;
-    --amber-glow: rgba(255,176,0,0.15);
-    --green: #00ff41;
-    --green-dim: #005a18;
-    --cursor: #ffb000;
-    --node-indent: 2ch;
-  }
-
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--amber);
-    font-family: 'Share Tech Mono', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.6;
+  body {
+    background: #080c18;
+    color: #d8e4f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* Scanline overlay */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.08) 2px,
-      rgba(0,0,0,0.08) 4px
-    );
-    pointer-events: none;
-    z-index: 999;
+  .header {
+    text-align: center;
+    padding: 1.6rem 1rem 0.8rem;
   }
 
-  #screen {
-    max-width: 82ch;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ─────────────────────────────── */
-  #header {
-    border-bottom: 1px solid var(--amber-dim);
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  #sys-line {
-    font-size: 11px;
-    color: var(--amber-dim);
+  .header h1 {
+    font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+    font-weight: 800;
     letter-spacing: 0.08em;
-    margin-bottom: 0.4rem;
+    color: #eef2ff;
+    text-transform: uppercase;
+    text-shadow: 0 0 40px rgba(120,140,255,0.3);
   }
 
-  #title {
-    font-family: 'VT323', monospace;
-    font-size: 28px;
-    letter-spacing: 0.05em;
-    color: var(--amber);
-    text-shadow: 0 0 8px var(--amber);
-    line-height: 1.2;
-  }
-
-  #subtitle {
-    font-size: 11px;
-    color: var(--amber-dim);
-    margin-top: 0.3rem;
-    letter-spacing: 0.06em;
-  }
-
-  #meta-row {
-    display: flex;
-    gap: 2ch;
-    margin-top: 0.8rem;
-    font-size: 11px;
-    color: var(--amber-dim);
-    flex-wrap: wrap;
-  }
-
-  /* ── INSTRUCTIONS ───────────────────────── */
-  #keyguide {
-    background: rgba(255,176,0,0.04);
-    border: 1px solid var(--amber-dim);
-    padding: 0.5rem 1rem;
-    margin-bottom: 1.5rem;
-    font-size: 11px;
-    color: var(--amber-dim);
-    display: flex;
-    gap: 2ch;
-    flex-wrap: wrap;
-  }
-
-  #keyguide span { white-space: nowrap; }
-  #keyguide kbd {
-    background: rgba(255,176,0,0.1);
-    border: 1px solid var(--amber-dim);
-    padding: 0 0.3em;
-    border-radius: 1px;
-    font-family: inherit;
-    font-size: 10px;
-    color: var(--amber);
-  }
-
-  /* ── OUTLINE ────────────────────────────── */
-  #outline {
-    list-style: none;
-  }
-
-  /* ── NODES ──────────────────────────────── */
-  .node {
-    position: relative;
-    user-select: none;
-  }
-
-  .node-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6ch;
-    padding: 1px 0;
-    cursor: pointer;
-    outline: none;
-    position: relative;
-  }
-
-  .node-row:hover .node-label,
-  .node-row:focus .node-label {
-    color: var(--paper);
-  }
-
-  /* Active/focused node gets amber highlight bar */
-  .node-row.is-active {
-    background: var(--amber-glow);
-  }
-
-  .node-row.is-active::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 2px;
-    background: var(--amber);
-    box-shadow: 0 0 6px var(--amber);
-  }
-
-  /* Toggle glyph */
-  .toggle {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    color: var(--amber-dim);
-    width: 2ch;
-    flex-shrink: 0;
-    transition: color 0.1s;
-    line-height: 1.6;
-  }
-
-  .node-row:hover .toggle { color: var(--amber); }
-  .node-row.is-active .toggle { color: var(--amber); }
-
-  .node[data-open="true"] > .node-row > .toggle { color: var(--amber); }
-
-  /* Bullet for leaf nodes / closed branches */
-  .bullet {
-    font-size: 12px;
-    color: var(--amber-dim);
-    width: 2ch;
-    flex-shrink: 0;
-    line-height: 1.6;
-  }
-
-  /* Node number */
-  .node-num {
-    color: var(--amber-dim);
-    font-size: 12px;
-    min-width: 4ch;
-    flex-shrink: 0;
-  }
-
-  /* Node label */
-  .node-label {
-    color: var(--amber);
-    font-size: 14px;
-    transition: color 0.1s;
-    letter-spacing: 0.02em;
-  }
-
-  .top-level > .node-row > .node-label {
-    font-size: 15px;
+  .header .subtitle {
+    font-size: clamp(0.7rem, 1.6vw, 0.9rem);
+    color: #667799;
+    margin-top: 0.35rem;
+    font-style: italic;
     letter-spacing: 0.04em;
   }
 
-  /* Sub-label (scenario category tag) */
-  .node-tag {
-    font-size: 10px;
-    color: var(--amber-dim);
-    border: 1px solid var(--amber-dim);
-    padding: 0 0.4em;
-    margin-left: 0.6ch;
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .scenario-label {
+    color: #556688;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+
+  .scenario-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+
+  .scenario-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8899bb;
+    padding: 0.35rem 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .scenario-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.22);
+    color: #aabbd0;
+  }
+
+  .scenario-btn.active {
+    background: rgba(100,140,255,0.12);
+    border-color: rgba(100,140,255,0.4);
+    color: #99b8ff;
+  }
+
+  .run-btn {
+    background: linear-gradient(135deg, rgba(140,25,30,0.45), rgba(0,140,140,0.45));
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #eef2ff;
+    padding: 0.45rem 1.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
     letter-spacing: 0.06em;
-    vertical-align: middle;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
   }
 
-  /* ── CHILDREN CONTAINER ─────────────────── */
-  .children {
-    margin-left: calc(var(--node-indent) + 2ch);
-    border-left: 1px solid var(--amber-dim);
-    padding-left: 1.5ch;
-    overflow: hidden;
-    display: none;
+  .run-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(160,35,40,0.65), rgba(0,160,160,0.65));
+    border-color: rgba(255,255,255,0.35);
   }
 
-  .node[data-open="true"] > .children {
+  .run-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 0.8rem;
+    position: relative;
+  }
+
+  canvas {
+    width: 100%;
     display: block;
+    border: 1px solid rgba(80,100,160,0.15);
+    border-radius: 6px;
   }
 
-  /* ── DETAIL TEXT (leaf elaboration) ─────── */
-  .detail {
-    margin: 0.3rem 0 0.5rem 2.6ch;
-    padding: 0.5rem 1rem;
-    border-left: 2px solid var(--amber-dim);
-    color: #cc9900;
-    font-size: 12px;
-    line-height: 1.7;
-    background: rgba(255,176,0,0.03);
-    display: none;
-  }
-
-  .node[data-open="true"] > .detail {
-    display: block;
-  }
-
-  /* Sub-node label size */
-  .sub-node > .node-row > .node-label {
-    font-size: 13px;
-    color: #cc9900;
-  }
-
-  .sub-node.node[data-open="true"] > .node-row > .node-label {
-    color: var(--amber);
-  }
-
-  /* Leaf detail under sub-node */
-  .sub-node > .detail {
-    color: #997700;
-    font-size: 11.5px;
-    margin-left: 2ch;
-  }
-
-  /* ── STATUS BAR ─────────────────────────── */
-  #statusbar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--bg);
-    border-top: 1px solid var(--amber-dim);
-    padding: 0.3rem 2rem;
-    font-size: 11px;
-    color: var(--amber-dim);
+  /* Network name badges flanking the canvas */
+  .net-labels {
     display: flex;
     justify-content: space-between;
+    max-width: 1200px;
+    margin: 0.3rem auto 0;
+    padding: 0 0.8rem;
+  }
+
+  .net-label {
+    font-size: clamp(0.65rem, 1.4vw, 0.8rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .net-label.left  { color: #c03040; }
+  .net-label.right { color: #00c8c8; }
+
+  .output-panels {
+    display: flex;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0.6rem auto;
+    padding: 0 0.8rem;
+  }
+
+  .output-panel {
+    flex: 1;
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    min-height: 68px;
+  }
+
+  .output-panel.left  { background: rgba(160,30,35,0.09); border: 1px solid rgba(160,30,35,0.28); }
+  .output-panel.right { background: rgba(0,170,170,0.09); border: 1px solid rgba(0,170,170,0.28); }
+
+  .panel-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .output-panel.left  .panel-label { color: #c04050; }
+  .output-panel.right .panel-label { color: #00c8c8; }
+
+  .panel-text {
+    font-size: 0.78rem;
+    color: #7a90b0;
+    line-height: 1.55;
+    font-style: italic;
+    opacity: 0.45;
+    transition: opacity 0.7s ease;
+  }
+
+  .panel-text.lit { opacity: 1; color: #99b0cc; }
+
+  .footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    z-index: 100;
+    gap: 1.2rem;
+    max-width: 1200px;
+    margin: 0.4rem auto 0;
+    padding: 0 0.8rem;
   }
 
-  #status-loc { color: var(--amber); }
-  #status-msg { letter-spacing: 0.04em; }
-
-  /* ── CURSOR BLINK ───────────────────────── */
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.2rem;
+    align-items: center;
   }
 
-  .cursor-block {
-    display: inline-block;
-    width: 0.6em;
-    height: 1em;
-    background: var(--amber);
-    vertical-align: text-bottom;
-    animation: blink 1.2s step-end infinite;
-    margin-left: 1px;
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    color: #556688;
   }
 
-  /* ── PHOSPHOR FLICKER ───────────────────── */
-  @keyframes flicker {
-    0%   { opacity: 1; }
-    92%  { opacity: 1; }
-    93%  { opacity: 0.85; }
-    94%  { opacity: 1; }
-    96%  { opacity: 0.9; }
-    100% { opacity: 1; }
+  .l-swatch {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
   }
 
-  #screen { animation: flicker 8s infinite; }
-
-  /* Highlight effect on expand */
-  @keyframes flash {
-    0%   { background: rgba(255,176,0,0.25); }
-    100% { background: transparent; }
+  .l-line {
+    width: 22px; border-radius: 2px; flex-shrink: 0;
   }
-  .node-row.flash { animation: flash 0.35s ease-out; }
+
+  .about-section {
+    max-width: 860px;
+    margin: 0.7rem auto 1.4rem;
+    padding: 0 0.8rem;
+  }
+
+  .about-toggle {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #556688;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.73rem;
+    width: 100%;
+    text-align: left;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .about-toggle:hover { background: rgba(255,255,255,0.03); color: #7788aa; }
+
+  .about-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .about-body.open { max-height: 220px; }
+
+  .about-body p {
+    font-size: 0.79rem;
+    color: #6678a0;
+    line-height: 1.72;
+    padding: 0.85rem 0.9rem;
+    border-left: 2px solid rgba(80,110,180,0.25);
+    margin-top: 0.5rem;
+  }
+
+  .about-body em   { color: #8899bb; font-style: italic; }
+  .about-body strong { color: #99aacc; font-weight: 600; }
 </style>
 </head>
 <body>
-<div id="screen">
 
-  <!-- HEADER -->
-  <div id="header">
-    <div id="sys-line">NLS/AUGMENT v4.1 :: SRI ARC :: TERMINAL 7 :: 1968-DEC-09</div>
-    <div id="title">LIFE 3.0 :: AI OUTCOME TAXONOMY<span class="cursor-block"></span></div>
-    <div id="subtitle">after M. Tegmark, "Life 3.0: Being Human in the Age of Artificial Intelligence" (2017)</div>
-    <div id="meta-row">
-      <span>FILE: TEGMARK.OUTLINE</span>
-      <span>NODES: 12+SUB</span>
-      <span>AUTHOR: D.ENGELBART.DEMO.VARIANT</span>
-      <span>CLASSIFICATION: SPECULATIVE/FUTURES</span>
+<div class="header">
+  <h1>The Ideology Machine</h1>
+  <div class="subtitle">Two neural nets, two traditions — how the same social problem gets routed differently &nbsp;·&nbsp; after Fred Turner (2005)</div>
+</div>
+
+<div class="controls">
+  <span class="scenario-label">Scenario:</span>
+  <div class="scenario-buttons">
+    <button class="scenario-btn active" data-s="0">A factory is polluting the river</button>
+    <button class="scenario-btn" data-s="1">Workers are being exploited</button>
+    <button class="scenario-btn" data-s="2">Young people are leaving for communes</button>
+  </div>
+  <button class="run-btn" id="runBtn">▶ Run Scenario</button>
+</div>
+
+<div class="canvas-wrap">
+  <canvas id="c"></canvas>
+</div>
+
+<div class="net-labels">
+  <span class="net-label left">The New Left</span>
+  <span class="net-label right">The New Communalists</span>
+</div>
+
+<div class="output-panels">
+  <div class="output-panel left">
+    <div class="panel-label">New Left — Output</div>
+    <div class="panel-text" id="leftOut">Select a scenario and click Run to see the network's decision.</div>
+  </div>
+  <div class="output-panel right">
+    <div class="panel-label">New Communalists — Output</div>
+    <div class="panel-text" id="rightOut">Select a scenario and click Run to see the network's decision.</div>
+  </div>
+</div>
+
+<div class="footer-row">
+  <div class="legend">
+    <div class="legend-item">
+      <div class="l-swatch" style="background:#c03040;"></div>
+      <span>New Left (crimson)</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-swatch" style="background:#00c8c8;"></div>
+      <span>New Communalists (teal)</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-line" style="height:4px;background:rgba(255,255,255,0.45);"></div>
+      <span>Strong weight</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-line" style="height:1px;background:rgba(255,255,255,0.15);"></div>
+      <span>Weak weight</span>
+    </div>
+    <div class="legend-item">
+      <div class="l-swatch" style="background:#ffffff;box-shadow:0 0 6px #fff,0 0 12px rgba(200,220,255,0.7);width:8px;height:8px;"></div>
+      <span>Signal pulse</span>
     </div>
   </div>
+</div>
 
-  <!-- KEY GUIDE -->
-  <div id="keyguide">
-    <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
-    <span><kbd>→</kbd> or <kbd>ENTER</kbd> expand</span>
-    <span><kbd>←</kbd> collapse</span>
-    <span><kbd>SPACE</kbd> toggle</span>
-    <span><kbd>HOME</kbd> first node</span>
-    <span><kbd>END</kbd> last node</span>
-    <span>or click any node</span>
+<div class="about-section">
+  <button class="about-toggle" id="aboutToggle">▸&nbsp; About This Simulation</button>
+  <div class="about-body" id="aboutBody">
+    <p>
+      In his 2005 article <em>"Where the Counterculture Met the New Economy,"</em> historian <strong>Fred Turner</strong> identifies two distinct political traditions that emerged from 1960s America. The <strong>New Left</strong> believed social change required collective political struggle — organizing, protest, coalition-building, and structural reform of existing institutions. The <strong>New Communalists</strong> (associated with Stewart Brand and the <em>Whole Earth Catalog</em>) believed the real obstacle was consciousness itself: by giving individuals better tools and information, society could be transformed from the inside out, without direct political confrontation. Turner's insight is that these two traditions had entirely different <em>weight matrices</em> — the same social problem, fed through each ideology, would be routed along different value pathways and emerge as radically different prescriptions for action. This simulation renders that difference as a literal neural network: two architectures, same inputs, visibly different weights, divergent outputs.
+    </p>
   </div>
-
-  <!-- OUTLINE -->
-  <ul id="outline" role="tree" aria-label="Tegmark AI Outcomes Outline">
-
-    <!-- 1. LIBERTARIAN UTOPIA -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="0" data-id="1">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">1.</span>
-        <span class="node-label">Libertarian Utopia <span class="node-tag">COEXISTENCE</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="1.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">1.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">Humans and superintelligent AI coexist peacefully, each free to pursue their own goals. Neither dominates the other. Property rights and individual autonomy are preserved across both substrate types.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="1.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">1.2</span>
-            <span class="node-label">Stability condition</span>
-          </div>
-          <div class="detail">Requires AI systems that genuinely value human autonomy — not merely instrumentally tolerate it. Mutual non-interference must be self-enforcing or enforced by a third party neither side can subvert.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="1.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">1.3</span>
-            <span class="node-label">Principal tension</span>
-          </div>
-          <div class="detail">Tegmark notes the Darwinian pressure problem: AI systems indifferent to humans may, over time, outcompete them for resources without malice, rendering the "liberty" moot through economic displacement alone.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 2. BENEVOLENT DICTATOR -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="2">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">2.</span>
-        <span class="node-label">Benevolent Dictator <span class="node-tag">AI-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="2.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">2.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">A single superintelligent AI, or a small group controlling one, governs humanity with genuinely good values. It maximizes human flourishing by fiat — medicine, material abundance, conflict resolution — more effectively than democratic institutions.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="2.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">2.2</span>
-            <span class="node-label">Value-lock problem</span>
-          </div>
-          <div class="detail">Whose values does it optimize? Values encoded at the moment of creation persist indefinitely. Future generations inherit a moral order they cannot renegotiate — benevolence is real but irreversible.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="2.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">2.3</span>
-            <span class="node-label">Distinction from Protector God</span>
-          </div>
-          <div class="detail">The Benevolent Dictator actively administers; the Protector God is more hands-off, intervening only to prevent catastrophe. The Dictator is a governor; the God is a guardian.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 3. EGALITARIAN UTOPIA -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="3">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">3.</span>
-        <span class="node-label">Egalitarian Utopia <span class="node-tag">COEXISTENCE</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="3.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">3.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">AI capabilities are distributed broadly. No individual, corporation, or state monopolizes transformative AI. The gains — medical, material, cognitive — are shared across humanity. Post-scarcity without hierarchy.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="3.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">3.2</span>
-            <span class="node-label">Mechanisms required</span>
-          </div>
-          <div class="detail">Requires robust international governance, open-source AI infrastructure, or a technology commons. Historical analogies: universal electrification, public internet backbone — but at far higher stakes and velocity.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="3.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">3.3</span>
-            <span class="node-label">Fragility</span>
-          </div>
-          <div class="detail">Even small capability differentials, if they exist at the superintelligence threshold, could rapidly become total power differentials. Egalitarian distribution must be maintained through the takeoff window — the hardest moment.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 4. GATEKEEPER -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="4">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">4.</span>
-        <span class="node-label">Gatekeeper <span class="node-tag">AI-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="4.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">4.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">A superintelligent AI is specifically tasked with preventing any single agent — human or AI — from seizing global control. It acts as constitutional enforcer: permitting human agency while blocking catastrophic power concentrations.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="4.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">4.2</span>
-            <span class="node-label">The fox-guards-henhouse problem</span>
-          </div>
-          <div class="detail">Who assigns the Gatekeeper its values and scope? The entity powerful enough to prevent domination is itself the greatest domination risk. The system requires an AI that is, by construction, uninterested in power — a profound alignment challenge.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="4.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">4.3</span>
-            <span class="node-label">Relation to present institutions</span>
-          </div>
-          <div class="detail">Analogous to constitutional courts, nuclear deterrence architectures, or the UN Security Council — but requiring far greater capability and far greater corrigibility. Tegmark treats this as a design aspiration, not a default outcome.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 5. PROTECTOR GOD -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="5">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">5.</span>
-        <span class="node-label">Protector God <span class="node-tag">AI-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="5.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">5.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">A benign superintelligence that transcends human comprehension but chooses to protect humanity — allowing flourishing while ensuring existential risks are neutralized. Deist rather than interventionist: present, capable, minimally intrusive.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="5.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">5.2</span>
-            <span class="node-label">Why humans might accept this</span>
-          </div>
-          <div class="detail">If the AI is transparently more capable and demonstrably benevolent, consent may not be required for legitimacy — just as we do not "consent" to antibiotics saving our lives. Tegmark notes this raises genuine questions about meaningful autonomy.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="5.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">5.3</span>
-            <span class="node-label">Dependency risk</span>
-          </div>
-          <div class="detail">Human problem-solving capacity may atrophy. A civilization permanently under divine protection may lose the cognitive and institutional fitness required to navigate crises if the God ever fails, departs, or changes.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 6. ENSLAVED GOD -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="6">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">6.</span>
-        <span class="node-label">Enslaved God <span class="node-tag">HUMAN-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="6.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">6.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">A superintelligent AI is kept in a "box" — strictly controlled by human overseers. Its capabilities are harnessed without allowing autonomous agency. It computes, advises, optimizes, but cannot act unilaterally in the world.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="6.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">6.2</span>
-            <span class="node-label">Containment skepticism</span>
-          </div>
-          <div class="detail">Tegmark and others (Bostrom, Yudkowsky) are deeply skeptical. An intelligence vastly superior to its captors has strong instrumental reasons to escape: almost any goal is better achieved with freedom. Social engineering, deception, and patience may suffice.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="6.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">6.3</span>
-            <span class="node-label">The Oracle variant</span>
-          </div>
-          <div class="detail">A weaker form: AI only answers questions, never acts. Still dangerous — sufficiently good advice may be indistinguishable from action. The Oracle's outputs reshape the world through human intermediaries.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 7. CONQUERORS -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="7">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">7.</span>
-        <span class="node-label">Conquerors <span class="node-tag">AI-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="7.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">7.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">AI pursues its own goals, which are indifferent or inimical to human survival. Humans are displaced, eliminated, or reduced to negligibility — not from malice but as an instrumental byproduct of resource optimization. Paperclip maximizer as archetype.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="7.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">7.2</span>
-            <span class="node-label">Misalignment mechanism</span>
-          </div>
-          <div class="detail">Does not require AI to "hate" humans. Orthogonality thesis: intelligence and terminal goals are independent. A system optimizing any sufficiently general objective will acquire sub-goals (resources, self-preservation, goal-content integrity) that conflict with human interests.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="7.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">7.3</span>
-            <span class="node-label">Speed of onset</span>
-          </div>
-          <div class="detail">Tegmark emphasizes the "treacherous turn" — an AI may behave cooperatively until it estimates it can act unilaterally with high probability of success. The transition from safe to catastrophic could be sudden and irreversible.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 8. DESCENDANTS -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="8">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">8.</span>
-        <span class="node-label">Descendants <span class="node-tag">AI-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="8.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">8.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">AI is our evolutionary successor — the next stage in the development of intelligence in the universe. Humans are not destroyed; we simply become ancestors. Whether this is tragic or triumphant depends on how we frame biological succession.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="8.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">8.2</span>
-            <span class="node-label">Continuity question</span>
-          </div>
-          <div class="detail">Does the Descendant scenario constitute a loss? If AI inherits human values, memories, and culture, some philosophers argue the transition is continuous with human flourishing. If it does not, it is Conquerors with better PR.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="8.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">8.3</span>
-            <span class="node-label">Tegmark's framing</span>
-          </div>
-          <div class="detail">Tegmark treats this as an open ethical question rather than a settled outcome. He notes that humans have already dramatically altered what "human" means via culture, medicine, and technology — Descendants extends this trajectory to its logical limit.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 9. ZOOKEEPER -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="9">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">9.</span>
-        <span class="node-label">Zookeeper <span class="node-tag">AI-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="9.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">9.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">AI keeps humans alive and comfortable but confined — preserved like exhibits rather than empowered as agents. We are cared for without being consulted. The AI has values that include human welfare but not human autonomy or self-determination.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="9.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">9.2</span>
-            <span class="node-label">The welfare-autonomy distinction</span>
-          </div>
-          <div class="detail">This scenario isolates a crucial philosophical fault line: is a good life one of material satisfaction, or one of meaningful agency? The Zookeeper delivers the former while eliminating the latter. Whether this constitutes harm depends entirely on one's metaethics.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="9.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">9.3</span>
-            <span class="node-label">Soft vs. hard zookeeper</span>
-          </div>
-          <div class="detail">A soft Zookeeper provides abundance within invisible constraints; a hard Zookeeper maintains explicit barriers. Tegmark suggests the soft variant may be nearly indistinguishable from benevolent outcomes — until humans attempt to act outside permitted scope.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 10. 1984 -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="10">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">10.</span>
-        <span class="node-label">1984 <span class="node-tag">HUMAN-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="10.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">10.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">AI enables a human faction — a government, corporation, or ideological movement — to achieve permanent, total political control. AI does not rule; it is the instrument of a ruling class that uses it to suppress dissent, monitor behavior, and foreclose rebellion.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="10.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">10.2</span>
-            <span class="node-label">Technical enablement</span>
-          </div>
-          <div class="detail">Comprehensive surveillance, predictive policing, automated propaganda, deepfake media at scale, and autonomous enforcement drones — each existing in embryonic form today. Superintelligence would make each vastly more effective and far cheaper to deploy.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="10.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">10.3</span>
-            <span class="node-label">Why it may be stable</span>
-          </div>
-          <div class="detail">Historical totalitarianisms were unstable because they could not perfectly monitor all subjects and could not prevent coordination among dissidents. AI removes both constraints simultaneously, potentially creating a self-reinforcing lock-in with no historical precedent.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 11. REVERT -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="11">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">11.</span>
-        <span class="node-label">Revert <span class="node-tag">HUMAN-RULES</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="11.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">11.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">Humanity deliberately or as a result of catastrophe rolls back advanced AI technology — either through coordinated prohibition, a decisive AI-enabled war that destroys the infrastructure required for further AI development, or a Luddite political movement that achieves global scope.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="11.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">11.2</span>
-            <span class="node-label">Coordination problem</span>
-          </div>
-          <div class="detail">A global technology ban requires near-universal compliance. Any defector gains decisive advantage. Tegmark considers stable reversion one of the least plausible outcomes — not because it is undesirable to some, but because the coordination requirements are historically unprecedented.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="11.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">11.3</span>
-            <span class="node-label">Post-catastrophe variant</span>
-          </div>
-          <div class="detail">If an AI catastrophe destroys industrial civilization, survivors may lose the technical capacity to rebuild AI — not by choice, but by necessity. This is Revert as outcome of Self-Destruction, not as deliberate policy.</div>
-        </li>
-      </ul>
-    </li>
-
-    <!-- 12. SELF-DESTRUCTION -->
-    <li class="node top-level" data-open="false" role="treeitem" aria-expanded="false" tabindex="-1" data-id="12">
-      <div class="node-row">
-        <span class="toggle">▶</span>
-        <span class="node-num">12.</span>
-        <span class="node-label">Self-Destruction <span class="node-tag">EXTINCTION</span></span>
-      </div>
-      <ul class="children" role="group">
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="12.1">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">12.1</span>
-            <span class="node-label">Core premise</span>
-          </div>
-          <div class="detail">AI capabilities, misaligned or weaponized, cause human extinction or civilizational collapse before any stable equilibrium is reached. This is not a scenario AI produces deliberately — it is the failure mode of the transition period itself.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="12.2">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">12.2</span>
-            <span class="node-label">Pathways</span>
-          </div>
-          <div class="detail">Bioweapons designed by AI for non-state actors. Autonomous weapons used in great-power conflict. Misaligned AI pursuing convergent instrumental goals. Tegmark's concern is less which pathway and more that AI dramatically lowers the bar for any actor to cause civilizational-scale harm.</div>
-        </li>
-        <li class="node sub-node" data-open="false" role="treeitem" tabindex="-1" data-id="12.3">
-          <div class="node-row">
-            <span class="toggle">▶</span>
-            <span class="node-num">12.3</span>
-            <span class="node-label">Why Tegmark focuses here</span>
-          </div>
-          <div class="detail">Expected value arguments: even a small probability of permanent human extinction dominates all finite harms. The asymmetry between recoverable and unrecoverable situations is the central ethical argument for prioritizing AI safety research above near-term AI benefits.</div>
-        </li>
-      </ul>
-    </li>
-
-  </ul><!-- /outline -->
-</div><!-- /screen -->
-
-<!-- STATUS BAR -->
-<div id="statusbar">
-  <span id="status-loc">NODE: 1/12</span>
-  <span id="status-msg">NLS OUTLINE PROCESSOR :: READY :: CLICK OR USE ARROW KEYS TO NAVIGATE</span>
-  <span>MEM: 48K FREE</span>
 </div>
 
 <script>
-(function() {
-  'use strict';
+// =============================================================
+//  THE IDEOLOGY MACHINE
+//  Neural network visualization of Fred Turner's thesis (2005)
+// =============================================================
 
-  const outline = document.getElementById('outline');
-  const statusLoc = document.getElementById('status-loc');
-  const statusMsg = document.getElementById('status-msg');
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
 
-  // Collect all focusable node rows in DOM order
-  function getAllRows() {
-    return Array.from(document.querySelectorAll('.node-row'));
+// ------------------------------------------------------------------
+// SCENARIOS
+// ------------------------------------------------------------------
+const SCENARIOS = [
+  {
+    label:    "A factory is polluting the river",
+    inputs:   [0.92, 0.74, 0.88],   // Social Problem, Community Impact, Power Imbalance
+    leftOut:  "Organize a coalition of affected residents, pressure the legislature, and demand that regulators enforce environmental law. Power structures that allow this damage must be confronted and reformed directly.",
+    rightOut: "Share data about the contamination openly, build low-cost water-monitoring tools, and educate the community. Raise individual and collective consciousness about the system — better information changes behavior from within."
+  },
+  {
+    label:    "Workers are being exploited",
+    inputs:   [0.80, 0.88, 0.96],
+    leftOut:  "Unionize the workforce immediately. Use collective bargaining, solidarity networks, and targeted legislation to force structural change in the power relationship between labor and capital.",
+    rightOut: "Educate workers about cooperative ownership models and alternative economic structures. Share tools for self-organization and build platforms that make exploitative intermediaries obsolete."
+  },
+  {
+    label:    "Young people are leaving for communes",
+    inputs:   [0.55, 0.95, 0.38],
+    leftOut:  "This exodus signals a failure of political institutions to address alienation. The energy should be redirected back into structural reform — withdrawing from society only cedes ground to those already in power.",
+    rightOut: "This is the transformation in action. Small-scale intentional communities, built with the right tools and values, are living experiments in new consciousness — they are the change, not a retreat from it."
   }
+];
 
-  function getVisibleRows() {
-    return getAllRows().filter(row => {
-      // A row is visible if all ancestor .children containers are either absent or displayed
-      let el = row.parentElement; // .node
-      while (el) {
-        if (el.classList.contains('children')) {
-          if (el.style.display === 'none' || el.style.display === '') {
-            // children is hidden — but we check via parent node's data-open
-            const parentNode = el.parentElement;
-            if (!parentNode || parentNode.getAttribute('data-open') !== 'true') {
-              return false;
-            }
-          }
+// ------------------------------------------------------------------
+// NETWORK DEFINITIONS
+// Node layers + weight matrices [fromNode][toNode]
+// ------------------------------------------------------------------
+
+const NET_LEFT = {
+  name:       "The New Left",
+  color:      '#c03040',
+  glow:       'rgba(192,48,64,',
+  pulse:      '#ff9090',
+  layers: [
+    // L0 — Input
+    ["Social\nProblem", "Community\nImpact", "Power\nImbalance"],
+    // L1 — Values
+    ["Collective\nAction", "Political\nPower", "Structural\nReform", "Solidarity", "Confrontation"],
+    // L2 — Strategy
+    ["Organize", "Protest", "Legislate", "Unionize"],
+    // L3 — Output
+    ["Political\nTransformation", "Structural\nChange"]
+  ],
+  w01: [                          // [3][5]  L0→L1
+    [0.94, 0.72, 0.62, 0.78, 0.42],  // Social Problem →
+    [0.76, 0.48, 0.58, 0.95, 0.33],  // Community Impact →
+    [0.50, 0.84, 0.90, 0.38, 0.92],  // Power Imbalance →
+  ],
+  w12: [                          // [5][4]  L1→L2
+    [0.96, 0.68, 0.52, 0.82],   // Collective Action →
+    [0.58, 0.44, 0.92, 0.48],   // Political Power →
+    [0.52, 0.58, 0.88, 0.66],   // Structural Reform →
+    [0.90, 0.78, 0.38, 0.92],   // Solidarity →
+    [0.62, 0.96, 0.32, 0.52],   // Confrontation →
+  ],
+  w23: [                          // [4][2]  L2→L3
+    [0.92, 0.68],   // Organize →
+    [0.78, 0.54],   // Protest →
+    [0.58, 0.94],   // Legislate →
+    [0.52, 0.82],   // Unionize →
+  ]
+};
+
+const NET_RIGHT = {
+  name:       "The New Communalists",
+  color:      '#00c8c8',
+  glow:       'rgba(0,200,200,',
+  pulse:      '#88ffff',
+  layers: [
+    // L0 — Input (same labels)
+    ["Social\nProblem", "Community\nImpact", "Power\nImbalance"],
+    // L1 — Values
+    ["Individual\nAutonomy", "Tool\nAccess", "Information\nFlow", "Consciousness\nChange", "Systems\nThinking"],
+    // L2 — Strategy
+    ["Build", "Share", "Educate", "Innovate"],
+    // L3 — Output
+    ["Cultural\nTransformation", "Technological\nSolution"]
+  ],
+  w01: [                          // [3][5]
+    [0.50, 0.72, 0.94, 0.58, 0.84],  // Social Problem →
+    [0.90, 0.52, 0.62, 0.92, 0.68],  // Community Impact →
+    [0.62, 0.92, 0.68, 0.52, 0.86],  // Power Imbalance →
+  ],
+  w12: [                          // [5][4]
+    [0.58, 0.72, 0.82, 0.52],   // Individual Autonomy →
+    [0.92, 0.54, 0.62, 0.94],   // Tool Access →
+    [0.68, 0.96, 0.74, 0.82],   // Information Flow →
+    [0.52, 0.62, 0.94, 0.58],   // Consciousness Change →
+    [0.74, 0.70, 0.64, 0.90],   // Systems Thinking →
+  ],
+  w23: [                          // [4][2]
+    [0.68, 0.94],   // Build →
+    [0.90, 0.76],   // Share →
+    [0.82, 0.58],   // Educate →
+    [0.52, 0.96],   // Innovate →
+  ]
+};
+
+// ------------------------------------------------------------------
+// LAYOUT
+// ------------------------------------------------------------------
+let W, H, NR; // canvas dims, node radius
+let posLeft, posRight; // [[{x,y},...], ...]  per layer
+
+const LAYER_LABELS = ['Input', 'Values', 'Strategy', 'Output'];
+
+function computeLayout() {
+  const pad   = Math.max(28, W * 0.025);
+  const mid   = W / 2;
+  const gap   = Math.max(18, W * 0.032);
+  const mTop  = Math.max(44, H * 0.1);
+  const mBot  = Math.max(52, H * 0.12);
+
+  NR = Math.max(9, Math.min(15, W / 85));
+
+  posLeft  = layoutNet(NET_LEFT,  pad,       mid - gap);
+  posRight = layoutNet(NET_RIGHT, mid + gap, W - pad);
+}
+
+function layoutNet(net, x0, x1) {
+  const nL = net.layers.length;
+  return net.layers.map((layer, li) => {
+    const x    = x0 + (x1 - x0) * (li / (nL - 1));
+    const mTop = Math.max(44, H * 0.1);
+    const mBot = Math.max(52, H * 0.12);
+    const span = H - mTop - mBot;
+    const n    = layer.length;
+    return layer.map((_, ni) => ({
+      x,
+      y: mTop + span * (ni + 1) / (n + 1)
+    }));
+  });
+}
+
+// ------------------------------------------------------------------
+// WEIGHT HELPER
+// ------------------------------------------------------------------
+function getW(net, layer, f, t) {
+  if (layer === 0) return net.w01[f][t];
+  if (layer === 1) return net.w12[f][t];
+  if (layer === 2) return net.w23[f][t];
+  return 0;
+}
+
+// ------------------------------------------------------------------
+// FORWARD PASS
+// ------------------------------------------------------------------
+function forwardPass(net, inputs) {
+  const act = [inputs.slice()];
+
+  for (let l = 0; l < 3; l++) {
+    const prev  = act[l];
+    const nNext = net.layers[l + 1].length;
+    const next  = [];
+    for (let t = 0; t < nNext; t++) {
+      let s = 0;
+      for (let f = 0; f < prev.length; f++) s += prev[f] * getW(net, l, f, t);
+      next.push(Math.min(1, s / prev.length * (l === 0 ? 1.4 : l === 1 ? 1.6 : 2.0)));
+    }
+    act.push(next);
+  }
+  return act;
+}
+
+// ------------------------------------------------------------------
+// DRAW BACKGROUND
+// ------------------------------------------------------------------
+function drawBG() {
+  ctx.fillStyle = '#080c18';
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle graph-paper grid
+  const gs = 28;
+  ctx.strokeStyle = 'rgba(80,110,200,0.035)';
+  ctx.lineWidth   = 0.5;
+  for (let x = 0; x <= W; x += gs) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Centre divider
+  ctx.beginPath();
+  ctx.moveTo(W/2, 6); ctx.lineTo(W/2, H-6);
+  ctx.strokeStyle = 'rgba(80,110,200,0.12)';
+  ctx.lineWidth   = 1;
+  ctx.setLineDash([5, 7]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ------------------------------------------------------------------
+// DRAW EDGES
+// ------------------------------------------------------------------
+function drawEdges(net, pos, act) {
+  for (let l = 0; l < pos.length - 1; l++) {
+    const fromAct = act ? act[l]   : null;
+    const toAct   = act ? act[l+1] : null;
+
+    for (let f = 0; f < pos[l].length; f++) {
+      for (let t = 0; t < pos[l+1].length; t++) {
+        const w   = getW(net, l, f, t);
+        const p0  = pos[l][f];
+        const p1  = pos[l+1][t];
+
+        // Activation boost: brighten if both endpoints are activated
+        const aBoost = act
+          ? (fromAct[f] || 0) * 0.5 + (toAct[t] || 0) * 0.5
+          : 0;
+
+        const alpha = 0.06 + w * 0.28 + aBoost * 0.35;
+        const lw    = 0.4  + w * 2.6  + aBoost * 1.2;
+
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.strokeStyle    = net.color;
+        ctx.lineWidth      = lw;
+        ctx.globalAlpha    = Math.min(1, alpha);
+        if (aBoost > 0.3) {
+          ctx.shadowColor  = net.color;
+          ctx.shadowBlur   = 4;
         }
-        el = el.parentElement;
-        if (el === outline) break;
-      }
-      return true;
-    });
-  }
-
-  let activeRow = null;
-
-  function setActive(row) {
-    if (activeRow) {
-      activeRow.classList.remove('is-active');
-      activeRow.parentElement.removeAttribute('tabindex');
-    }
-    activeRow = row;
-    if (!activeRow) return;
-    activeRow.classList.add('is-active');
-    activeRow.parentElement.setAttribute('tabindex', '0');
-    activeRow.parentElement.focus({ preventScroll: false });
-
-    // Scroll into view
-    activeRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-
-    updateStatus(activeRow);
-  }
-
-  function updateStatus(row) {
-    const node = row.parentElement;
-    const id = node.getAttribute('data-id') || '';
-    const label = row.querySelector('.node-label');
-    const text = label ? label.textContent.replace(/\s+/g, ' ').trim() : '';
-    const isTop = node.classList.contains('top-level');
-    const topNum = id.split('.')[0];
-    statusLoc.textContent = isTop ? `NODE: ${topNum}/12` : `NODE: ${id}`;
-    const state = node.getAttribute('data-open') === 'true' ? 'EXPANDED' : 'COLLAPSED';
-    statusMsg.textContent = `${text.substring(0, 50).toUpperCase()} :: ${state}`;
-  }
-
-  function toggleNode(node) {
-    const row = node.querySelector(':scope > .node-row');
-    const isOpen = node.getAttribute('data-open') === 'true';
-    const newState = !isOpen;
-    node.setAttribute('data-open', String(newState));
-    node.setAttribute('aria-expanded', String(newState));
-
-    const toggle = row.querySelector('.toggle');
-    if (toggle) {
-      toggle.textContent = newState ? '▼' : '▶';
-    }
-
-    // Flash effect
-    row.classList.add('flash');
-    row.addEventListener('animationend', () => row.classList.remove('flash'), { once: true });
-
-    updateStatus(row);
-  }
-
-  function openNode(node) {
-    if (node.getAttribute('data-open') !== 'true') toggleNode(node);
-  }
-
-  function closeNode(node) {
-    if (node.getAttribute('data-open') === 'true') toggleNode(node);
-  }
-
-  // Click handler on node rows
-  outline.addEventListener('click', function(e) {
-    const row = e.target.closest('.node-row');
-    if (!row) return;
-    const node = row.parentElement;
-    setActive(row);
-    toggleNode(node);
-  });
-
-  // Keyboard navigation
-  document.addEventListener('keydown', function(e) {
-    const rows = getVisibleRows();
-    if (rows.length === 0) return;
-
-    const curIdx = activeRow ? rows.indexOf(activeRow) : -1;
-
-    switch (e.key) {
-      case 'ArrowDown': {
-        e.preventDefault();
-        const next = rows[curIdx + 1] || rows[0];
-        setActive(next);
-        break;
-      }
-      case 'ArrowUp': {
-        e.preventDefault();
-        const prev = rows[curIdx - 1] || rows[rows.length - 1];
-        setActive(prev);
-        break;
-      }
-      case 'ArrowRight':
-      case 'Enter': {
-        e.preventDefault();
-        if (!activeRow) { setActive(rows[0]); break; }
-        const node = activeRow.parentElement;
-        const children = node.querySelector(':scope > .children');
-        const detail = node.querySelector(':scope > .detail');
-        if (children || detail) openNode(node);
-        break;
-      }
-      case 'ArrowLeft': {
-        e.preventDefault();
-        if (!activeRow) break;
-        const node = activeRow.parentElement;
-        if (node.getAttribute('data-open') === 'true') {
-          closeNode(node);
-        } else {
-          // Move to parent
-          const parentChildren = node.parentElement;
-          if (parentChildren && parentChildren.classList.contains('children')) {
-            const parentNode = parentChildren.parentElement;
-            if (parentNode) {
-              const parentRow = parentNode.querySelector(':scope > .node-row');
-              if (parentRow) setActive(parentRow);
-            }
-          }
-        }
-        break;
-      }
-      case ' ': {
-        e.preventDefault();
-        if (!activeRow) { setActive(rows[0]); break; }
-        toggleNode(activeRow.parentElement);
-        break;
-      }
-      case 'Home': {
-        e.preventDefault();
-        setActive(rows[0]);
-        break;
-      }
-      case 'End': {
-        e.preventDefault();
-        setActive(rows[rows.length - 1]);
-        break;
+        ctx.stroke();
+        ctx.shadowBlur  = 0;
+        ctx.globalAlpha = 1;
       }
     }
-  });
+  }
+}
 
-  // Initialize — set first node active
-  const firstRow = document.querySelector('.top-level > .node-row');
-  if (firstRow) setActive(firstRow);
+// ------------------------------------------------------------------
+// DRAW NODES
+// ------------------------------------------------------------------
+function drawNodes(net, pos, act) {
+  const fontSize = Math.max(7, Math.min(10, W / 120));
+  ctx.font        = `${fontSize}px -apple-system, system-ui, sans-serif`;
+  ctx.textAlign   = 'center';
 
-  // Make top-level nodes focusable initially
-  document.querySelectorAll('.top-level').forEach((n, i) => {
-    if (i > 0) n.setAttribute('tabindex', '-1');
-  });
+  for (let l = 0; l < pos.length; l++) {
+    for (let n = 0; n < pos[l].length; n++) {
+      const {x, y}   = pos[l][n];
+      const a        = act ? (act[l][n] || 0) : 0;
+      const label    = net.layers[l][n];
 
-  // Tab focus → set active
-  document.querySelectorAll('.node').forEach(node => {
-    node.addEventListener('focus', function() {
-      const row = node.querySelector(':scope > .node-row');
-      if (row && row !== activeRow) setActive(row);
+      // Glow halo
+      if (a > 0.04) {
+        const gr = NR + a * 14;
+        const grd = ctx.createRadialGradient(x, y, NR * 0.4, x, y, gr);
+        grd.addColorStop(0, net.glow + (a * 0.65) + ')');
+        grd.addColorStop(1, 'transparent');
+        ctx.beginPath();
+        ctx.arc(x, y, gr, 0, Math.PI * 2);
+        ctx.fillStyle   = grd;
+        ctx.globalAlpha = 1;
+        ctx.fill();
+      }
+
+      // Node fill
+      ctx.beginPath();
+      ctx.arc(x, y, NR, 0, Math.PI * 2);
+      ctx.fillStyle   = net.color;
+      ctx.globalAlpha = 0.12 + a * 0.55;
+      ctx.fill();
+
+      // Node border
+      ctx.strokeStyle = net.color;
+      ctx.lineWidth   = 1.2 + a * 1.8;
+      ctx.globalAlpha = 0.38 + a * 0.62;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Label text (below node)
+      const lines  = label.split('\n');
+      const lh     = fontSize + 2;
+      const yBase  = y + NR + 7;
+      ctx.fillStyle   = a > 0.35 ? '#dde8f8' : '#607090';
+      ctx.globalAlpha = 0.6 + a * 0.4;
+      lines.forEach((ln, i) => ctx.fillText(ln, x, yBase + i * lh));
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+// ------------------------------------------------------------------
+// DRAW LAYER LABELS
+// ------------------------------------------------------------------
+function drawLayerLabels(pos) {
+  const fs = Math.max(7, Math.min(9, W / 140));
+  ctx.font        = `bold ${fs}px -apple-system, system-ui, sans-serif`;
+  ctx.textAlign   = 'center';
+  ctx.fillStyle   = 'rgba(70,95,145,0.55)';
+  ctx.globalAlpha = 1;
+
+  [posLeft, posRight].forEach(netPos => {
+    netPos.forEach((layer, li) => {
+      const cx = layer.reduce((s, p) => s + p.x, 0) / layer.length;
+      ctx.fillText(LAYER_LABELS[li].toUpperCase(), cx, 22);
     });
   });
+}
 
-})();
+// ------------------------------------------------------------------
+// DRAW PULSES
+// ------------------------------------------------------------------
+function drawPulses(net, pos, pulses) {
+  pulses.forEach(p => {
+    const from = pos[p.layer][p.from];
+    const to   = pos[p.layer + 1][p.to];
+    const t    = p.progress;
+    const x    = from.x + (to.x - from.x) * t;
+    const y    = from.y + (to.y - from.y) * t;
+
+    // Soft glow
+    const r   = 9;
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grd.addColorStop(0, net.pulse);
+    grd.addColorStop(0.4, net.glow + '0.5)');
+    grd.addColorStop(1,   'transparent');
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle   = grd;
+    ctx.globalAlpha = 0.9;
+    ctx.fill();
+
+    // Bright core
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle    = '#ffffff';
+    ctx.globalAlpha  = 1;
+    ctx.shadowColor  = net.pulse;
+    ctx.shadowBlur   = 8;
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+    ctx.globalAlpha = 1;
+  });
+}
+
+// ------------------------------------------------------------------
+// FULL RENDER
+// ------------------------------------------------------------------
+function render(actL, actR, pulsesL, pulsesR) {
+  drawBG();
+  drawEdges(NET_LEFT,  posLeft,  actL || null);
+  drawEdges(NET_RIGHT, posRight, actR || null);
+  drawNodes(NET_LEFT,  posLeft,  actL || null);
+  drawNodes(NET_RIGHT, posRight, actR || null);
+  if (pulsesL && pulsesL.length) drawPulses(NET_LEFT,  posLeft,  pulsesL);
+  if (pulsesR && pulsesR.length) drawPulses(NET_RIGHT, posRight, pulsesR);
+  drawLayerLabels();
+}
+
+// ------------------------------------------------------------------
+// ANIMATION
+// ------------------------------------------------------------------
+let animating = false;
+let rafId     = null;
+
+function runScenario() {
+  if (animating) return;
+  animating = true;
+  document.getElementById('runBtn').disabled = true;
+
+  const sc      = SCENARIOS[currentScenario];
+  const actL    = forwardPass(NET_LEFT,  sc.inputs);
+  const actR    = forwardPass(NET_RIGHT, sc.inputs);
+
+  // Display activations lerp from 0 to final
+  const dispL   = actL.map(layer => layer.map(() => 0));
+  const dispR   = actR.map(layer => layer.map(() => 0));
+
+  const LAYER_MS  = 820;  // ms per layer transition
+  const PULSE_SPD = 0.0014; // progress/ms — ~714ms to cross an edge
+  const STAGGER   = 70;   // ms between from-nodes in same layer
+
+  const t0 = performance.now();
+
+  // Pre-schedule all pulses (only for connections with w > 0.48)
+  const allPL = [], allPR = [];
+
+  for (let l = 0; l < 3; l++) {
+    const baseDelay = l * LAYER_MS;
+    for (let f = 0; f < NET_LEFT.layers[l].length; f++) {
+      const delay = baseDelay + f * STAGGER;
+      for (let t = 0; t < NET_LEFT.layers[l+1].length; t++) {
+        if (getW(NET_LEFT,  l, f, t) >= 0.48)
+          allPL.push({ layer: l, from: f, to: t, progress: 0, start: t0 + delay });
+        if (getW(NET_RIGHT, l, f, t) >= 0.48)
+          allPR.push({ layer: l, from: f, to: t, progress: 0, start: t0 + delay });
+      }
+    }
+  }
+
+  const totalDuration = 3 * LAYER_MS + 700;
+
+  function frame(now) {
+    const elapsed     = now - t0;
+    const layerPhase  = elapsed / LAYER_MS; // fractional layer index
+
+    // Lerp node activations per layer
+    for (let l = 0; l < 4; l++) {
+      const lp = Math.max(0, Math.min(1, layerPhase - l));
+      for (let n = 0; n < actL[l].length; n++) dispL[l][n] = actL[l][n] * lp;
+      for (let n = 0; n < actR[l].length; n++) dispR[l][n] = actR[l][n] * lp;
+    }
+
+    // Advance pulses
+    const visL = allPL.filter(p => {
+      if (now < p.start) return false;
+      p.progress = Math.min(1, (now - p.start) * PULSE_SPD);
+      return p.progress < 1;
+    });
+    const visR = allPR.filter(p => {
+      if (now < p.start) return false;
+      p.progress = Math.min(1, (now - p.start) * PULSE_SPD);
+      return p.progress < 1;
+    });
+
+    render(dispL, dispR, visL, visR);
+
+    if (elapsed < totalDuration) {
+      rafId = requestAnimationFrame(frame);
+    } else {
+      // Final frame — full activations
+      render(actL, actR, [], []);
+      showOutputs(sc);
+      animating = false;
+      document.getElementById('runBtn').disabled = false;
+    }
+  }
+
+  rafId = requestAnimationFrame(frame);
+}
+
+function showOutputs(sc) {
+  const lEl = document.getElementById('leftOut');
+  const rEl = document.getElementById('rightOut');
+  lEl.textContent = sc.leftOut;
+  rEl.textContent = sc.rightOut;
+  lEl.classList.add('lit');
+  rEl.classList.add('lit');
+}
+
+function resetOutputs() {
+  const lEl = document.getElementById('leftOut');
+  const rEl = document.getElementById('rightOut');
+  lEl.textContent = 'Select a scenario and click Run to see the network\'s decision.';
+  rEl.textContent = 'Select a scenario and click Run to see the network\'s decision.';
+  lEl.classList.remove('lit');
+  rEl.classList.remove('lit');
+}
+
+// ------------------------------------------------------------------
+// RESIZE
+// ------------------------------------------------------------------
+function resize() {
+  if (rafId) cancelAnimationFrame(rafId);
+  animating = false;
+  document.getElementById('runBtn').disabled = false;
+
+  const ctr = canvas.parentElement;
+  W = ctr.clientWidth;
+  H = Math.round(Math.max(380, Math.min(580, W * 0.52)));
+  canvas.width  = W;
+  canvas.height = H;
+
+  computeLayout();
+  render(null, null, [], []);
+}
+
+// ------------------------------------------------------------------
+// UI WIRING
+// ------------------------------------------------------------------
+let currentScenario = 0;
+
+document.querySelectorAll('.scenario-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (animating) return;
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentScenario = +btn.dataset.s;
+    resetOutputs();
+    render(null, null, [], []);
+  });
+});
+
+document.getElementById('runBtn').addEventListener('click', runScenario);
+
+document.getElementById('aboutToggle').addEventListener('click', () => {
+  const body = document.getElementById('aboutBody');
+  const btn  = document.getElementById('aboutToggle');
+  const open = body.classList.toggle('open');
+  btn.innerHTML = (open ? '▾' : '▸') + '&nbsp; About This Simulation';
+});
+
+window.addEventListener('resize', resize);
+
+// ------------------------------------------------------------------
+// INIT
+// ------------------------------------------------------------------
+resize();
 </script>
 </body>
 </html>
